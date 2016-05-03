@@ -3883,7 +3883,22 @@ S2.define('select2/dropdown/search',[
       self._keyUpPrevented = evt.isDefaultPrevented();
     });
 
-    this.$search.on('keyup', function (evt) {
+    // Workaround for browsers which do not support the `input` event
+    // This will prevent double-triggering of events for browsers which support
+    // both the `keyup` and `input` events.
+    // Disable the use of the input event handler on IE9
+    var keyevent;
+    if (!window.navigator.userAgent.match(/MSIE 9\.0/)) {
+      this.$search.on('input', function (evt) {
+        // Unbind the duplicated `keyup` event
+        $(this).off('keyup');
+      });
+      keyevent = 'keyup input';
+    } else {
+      keyevent = 'keyup';
+    }
+
+    this.$search.on(keyevent, function (evt) {
       self.handleSearch(evt);
     });
 
